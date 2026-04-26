@@ -530,6 +530,41 @@ export default function Chat() {
 
             </div>
           </div>
+
+          {/* Latest Emails panel */}
+          <div style={{ width: 320, flexShrink: 0, borderLeft: '1px solid var(--border)', background: 'var(--bg2)', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+            <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Latest Emails</div>
+              <span style={{ fontSize: 10, padding: '2px 7px', background: 'rgba(158,106,3,0.15)', border: '1px solid rgba(158,106,3,0.3)', borderRadius: 10, color: '#d4a72c', fontWeight: 600 }}>COMING SOON</span>
+            </div>
+            <div style={{ padding: 14, display: 'flex', flexDirection: 'column', gap: 8, opacity: 0.65 }}>
+              {[
+                { from: 'Raj Kumar', email: 'raj@geoserves.com', subject: 'RE: NOR Tendered – JAG KALASH at Paradip', time: '10:42', unread: true },
+                { from: 'Port Agent Paradip', email: 'ops@paradipport.in', subject: 'Berth availability update – ETA confirmation req.', time: '09:15', unread: true },
+                { from: 'ING Bunkers', email: 'bunkers@ing.com', subject: 'Bunker stem confirmation – JAG KALASH', time: '08:30', unread: false },
+                { from: 'Master JAG KALASH', email: 'master@jagkalash.com', subject: 'Daily noon report – 25 Apr 2026', time: 'Yesterday', unread: false },
+                { from: 'P&I Club', email: 'claims@pandi.com', subject: 'FW: Survey appointment – cargo damage query', time: 'Yesterday', unread: false },
+                { from: 'Charterer Ops', email: 'ops@charterer.com', subject: 'Laycan extension request – please advise', time: '2 days ago', unread: false },
+                { from: 'Customs Broker', email: 'customs@broker.in', subject: 'Import documentation checklist attached', time: '2 days ago', unread: false },
+                { from: 'Raj Kumar', email: 'raj@geoserves.com', subject: 'Stow plan approved – proceed to load', time: '3 days ago', unread: false },
+              ].map((email, i) => (
+                <div key={i} style={{ padding: '9px 10px', background: email.unread ? 'rgba(29,111,164,0.08)' : 'var(--bg3)', border: `1px solid ${email.unread ? 'rgba(29,111,164,0.2)' : 'var(--border)'}`, borderRadius: 'var(--radius)', cursor: 'default' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 3 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      {email.unread && <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--accent-light)', flexShrink: 0 }} />}
+                      <span style={{ fontSize: 12, fontWeight: email.unread ? 600 : 500, color: email.unread ? 'var(--text)' : 'var(--text2)' }}>{email.from}</span>
+                    </div>
+                    <span style={{ fontSize: 10, color: 'var(--text3)', flexShrink: 0 }}>{email.time}</span>
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--text3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingLeft: email.unread ? 12 : 0 }}>{email.subject}</div>
+                </div>
+              ))}
+              <div style={{ padding: '10px', background: 'rgba(158,106,3,0.06)', border: '1px solid rgba(158,106,3,0.15)', borderRadius: 'var(--radius)', textAlign: 'center', marginTop: 4 }}>
+                <div style={{ fontSize: 11, color: '#d4a72c', fontWeight: 500, marginBottom: 3 }}>📧 Connect your inbox</div>
+                <div style={{ fontSize: 11, color: 'var(--text3)' }}>Real emails filtered by vessel name will appear here automatically.</div>
+              </div>
+            </div>
+          </div>
         )}
       </div>
 
