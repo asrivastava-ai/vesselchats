@@ -434,23 +434,6 @@ export default function Chat() {
             </div>
           )}
         </div>
-      </div>
-
-      {/* Create group modal */}
-      {showCreateGroup && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ background: 'var(--bg2)', border: '1px solid var(--border2)', borderRadius: 'var(--radius-lg)', width: 380, padding: 24 }}>
-            <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 16 }}>Create new group</div>
-            <form onSubmit={handleCreateGroup} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <input value={newGroupName} onChange={e => setNewGroupName(e.target.value)} required placeholder="e.g. Blue Ocean Shipping" style={{ padding: '10px 12px', background: 'var(--bg)', border: '1px solid var(--border2)', borderRadius: 'var(--radius)', color: 'var(--text)', fontSize: 14, outline: 'none' }} />
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button type="button" onClick={() => setShowCreateGroup(false)} style={{ flex: 1, padding: 10, background: 'none', border: '1px solid var(--border2)', borderRadius: 'var(--radius)', color: 'var(--text2)', fontSize: 13 }}>Cancel</button>
-                <button type="submit" style={{ flex: 2, padding: 10, background: 'var(--accent)', border: 'none', borderRadius: 'var(--radius)', color: 'white', fontSize: 13, fontWeight: 500 }}>Create group</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
         {/* Email / AI Summary right panel — shown when a vessel is active */}
         {showEmailTeaser && !isMobile && (
@@ -469,7 +452,23 @@ export default function Chat() {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Create group modal */}
+      {showCreateGroup && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: 'var(--bg2)', border: '1px solid var(--border2)', borderRadius: 'var(--radius-lg)', width: 380, padding: 24 }}>
+            <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 16 }}>Create new group</div>
+            <form onSubmit={handleCreateGroup} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <input value={newGroupName} onChange={e => setNewGroupName(e.target.value)} required placeholder="e.g. Blue Ocean Shipping" style={{ padding: '10px 12px', background: 'var(--bg)', border: '1px solid var(--border2)', borderRadius: 'var(--radius)', color: 'var(--text)', fontSize: 14, outline: 'none' }} />
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button type="button" onClick={() => setShowCreateGroup(false)} style={{ flex: 1, padding: 10, background: 'none', border: '1px solid var(--border2)', borderRadius: 'var(--radius)', color: 'var(--text2)', fontSize: 13 }}>Cancel</button>
+                <button type="submit" style={{ flex: 2, padding: 10, background: 'var(--accent)', border: 'none', borderRadius: 'var(--radius)', color: 'white', fontSize: 13, fontWeight: 500 }}>Create group</button>
+              </div>
+            </form>
+          </div>
         </div>
+      )}
 
       {showAdmin && adminGroupId && (
         <GroupAdmin groupId={adminGroupId} groupName={adminGroupName} onClose={() => { setShowAdmin(false); setAdminGroupId(null); }} />
