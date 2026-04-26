@@ -333,17 +333,6 @@ export default function Chat() {
         <Sidebar groups={groups} activeSelection={activeSelection} onSelect={setActiveSelection} getUnreadCount={getUnreadCount} isMobile={isMobile} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} onCreateGroup={() => setShowCreateGroup(true)} allUsers={allUsers} memberRoles={memberRoles} onAdminGroup={(gid, gname) => { setAdminGroupId(gid); setAdminGroupName(gname); setShowAdmin(true); }} />
 
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          {/* Email teaser banner */}
-          {showEmailTeaser && (
-            <div style={{ padding: '8px 16px', background: 'rgba(158,106,3,0.12)', borderBottom: '1px solid rgba(158,106,3,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 14 }}>📧</span>
-                <span style={{ fontSize: 12, color: '#d4a72c', fontWeight: 500 }}>Connect your email to get AI summaries for this vessel</span>
-              </div>
-              <span style={{ fontSize: 11, color: 'var(--amber)', background: 'var(--amber-bg)', padding: '2px 8px', borderRadius: 10, border: '1px solid rgba(158,106,3,0.3)', whiteSpace: 'nowrap' }}>Coming soon</span>
-            </div>
-          )}
-
           {/* Messages */}
           <div style={{ flex: 1, overflowY: 'auto', padding: '16px 0' }}>
             {!activeSelection && (
@@ -462,6 +451,25 @@ export default function Chat() {
           </div>
         </div>
       )}
+
+        {/* Email / AI Summary right panel — shown when a vessel is active */}
+        {showEmailTeaser && !isMobile && (
+          <div style={{ width: 220, flexShrink: 0, borderLeft: '1px solid var(--border)', background: 'var(--bg2)', display: 'flex', flexDirection: 'column', padding: 16, gap: 12 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>AI Email Summary</div>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, textAlign: 'center' }}>
+              <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(158,106,3,0.15)', border: '1px solid rgba(158,106,3,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>📧</div>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 500, color: '#d4a72c', marginBottom: 6 }}>Connect your email</div>
+                <div style={{ fontSize: 12, color: 'var(--text2)', lineHeight: 1.6 }}>Get AI-powered summaries of the last 2 days of emails for this vessel — right here.</div>
+              </div>
+              <div style={{ width: '100%', padding: '8px 12px', background: 'rgba(158,106,3,0.1)', border: '1px solid rgba(158,106,3,0.25)', borderRadius: 'var(--radius)', fontSize: 11, color: '#d4a72c', fontWeight: 500 }}>
+                🚀 Coming soon
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--text3)', lineHeight: 1.6 }}>Gmail & Outlook integration planned. Action items, ETAs, and NORs auto-extracted.</div>
+            </div>
+          </div>
+        )}
+        </div>
 
       {showAdmin && adminGroupId && (
         <GroupAdmin groupId={adminGroupId} groupName={adminGroupName} onClose={() => { setShowAdmin(false); setAdminGroupId(null); }} />
