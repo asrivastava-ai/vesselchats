@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { collection, onSnapshot, addDoc, deleteDoc, doc, setDoc, serverTimestamp, getDocs } from 'firebase/firestore';
+import { collection, onSnapshot, addDoc, deleteDoc, doc, setDoc, updateDoc, serverTimestamp, getDocs } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
@@ -103,6 +103,12 @@ export default function GroupAdmin({ groupId, groupName, onClose }) {
       setGroupLink(`${window.location.origin}/invite?token=${token}`);
     }
     setGroupLinkLoading(false);
+  }
+
+  async function changeRole(memberId, currentRole) {
+    const newRole = currentRole === 'admin' ? 'member' : 'admin';
+    if (!window.confirm(`Change this member to ${newRole}?`)) return;
+    await updateDoc(doc(db, 'groups', groupId, 'members', memberId), { role: newRole });
   }
 
   const btnStyle = (active) => ({
@@ -211,7 +217,13 @@ export default function GroupAdmin({ groupId, groupName, onClose }) {
                   <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--accent-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 600, color: 'var(--accent-light)', flexShrink: 0 }}>{initials(m.name || m.email)}</div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 13, fontWeight: 500 }}>{m.name || m.email}</div>
-                    <div style={{ fontSize: 11, color: 'var(--text2)' }}>{m.email} · {m.role}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text2)' }}>{m.email}</div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 10, fontWeight: 500, background: m.role === 'admin' ? 'var(--accent-bg)' : 'var(--bg2)', color: m.role === 'admin' ? 'var(--accent-light)' : 'var(--text3)', border: '1px solid ' + (m.role === 'admin' ? 'rgba(29,111,164,0.3)' : 'var(--border)') }}>{m.role}</span>
+                    <button onClick={() => changeRole(m.id, m.role)} title={m.role === 'admin' ? 'Demote to member' : 'Promote to admin'} style={{ background: 'none', border: '1px solid var(--border2)', borderRadius: 4, color: 'var(--text2)', fontSize: 11, padding: '2px 7px', cursor: 'pointer' }}>
+                      {m.role === 'admin' ? '↓ Member' : '↑ Admin'}
+                    </button>
                   </div>
                 </div>
               ))}
