@@ -21,6 +21,8 @@ export default function GroupAdmin({ groupId, groupName, onClose }) {
   const [inviteLink, setInviteLink] = useState('');
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState('');
+  const [groupLink, setGroupLink] = useState('');
+  const [groupLinkLoading, setGroupLinkLoading] = useState(false);
 
   useEffect(() => {
     const u1 = onSnapshot(collection(db, 'groups', groupId, 'vessels'), snap => {
@@ -78,6 +80,31 @@ export default function GroupAdmin({ groupId, groupName, onClose }) {
     setLoading(false);
   }
 
+  async function generateGroupLink() {
+    setGroupLinkLoading(true);
+    // Check if a permanent group link already exists
+    const { getDocs, query, where } = await import('firebase/firestore');
+    const q = query(collection(db, 'invites'), where('groupId', '==', groupId), where('groupLink', '==', true), where('used', '==', false));
+    const existing = await getDocs(q);
+    if (!existing.empty) {
+      const token = existing.docs[0].id;
+      setGroupLink(`${window.location.origin}/invite?token=${token}`);
+    } else {
+      const token = 'grp_' + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+      await setDoc(doc(db, 'invites', token), {
+        groupId, groupName,
+        groupLink: true,
+        role: 'member',
+        used: false,
+        permanent: true,
+        createdAt: serverTimestamp(),
+        createdBy: profile?.name || ''
+      });
+      setGroupLink(`${window.location.origin}/invite?token=${token}`);
+    }
+    setGroupLinkLoading(false);
+  }
+
   const btnStyle = (active) => ({
     padding: '5px 12px', fontSize: 12, fontWeight: 500,
     background: active ? 'var(--accent)' : 'transparent',
@@ -101,6 +128,7 @@ export default function GroupAdmin({ groupId, groupName, onClose }) {
           <button style={btnStyle(tab==='vessels')} onClick={() => setTab('vessels')}>Vessels</button>
           <button style={btnStyle(tab==='invite')} onClick={() => setTab('invite')}>Invite member</button>
           <button style={btnStyle(tab==='members')} onClick={() => setTab('members')}>Members</button>
+          <button style={btnStyle(tab==='grouplink')} onClick={() => { setTab('grouplink'); generateGroupLink(); }}>Group link</button>
         </div>
         <div style={{ padding: 18, overflowY: 'auto', flex: 1 }}>
           {tab === 'vessels' && (
@@ -157,6 +185,25 @@ export default function GroupAdmin({ groupId, groupName, onClose }) {
               )}
             </div>
           )}
+          {tab === 'grouplink' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div style={{ padding: '12px 14px', background: 'rgba(158,106,3,0.1)', border: '1px solid rgba(158,106,3,0.25)', borderRadius: 'var(--radius)', fontSize: 13, color: '#d4a72c' }}>
+                <strong>Shareable group link</strong> — anyone with this link can join <strong>{groupName}</strong> as a member. They set their own name and password on first use.
+              </div>
+              {groupLinkLoading && <p style={{ color: 'var(--text2)', fontSize: 13 }}>Generating link...</p>}
+              {groupLink && !groupLinkLoading && (
+                <div style={{ background: 'var(--bg3)', border: '1px solid var(--border2)', borderRadius: 'var(--radius)', padding: 14 }}>
+                  <p style={{ fontSize: 11, color: 'var(--text2)', marginBottom: 8 }}>Share this link with your team:</p>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <input readOnly value={groupLink} onClick={e => e.target.select()} style={{ flex: 1, padding: '8px 10px', background: 'var(--bg)', border: '1px solid var(--border2)', borderRadius: 'var(--radius)', color: 'var(--accent-light)', fontSize: 11, outline: 'none' }} />
+                    <button onClick={() => { navigator.clipboard.writeText(groupLink); }} style={{ padding: '8px 12px', background: 'var(--bg2)', border: '1px solid var(--border2)', borderRadius: 'var(--radius)', color: 'var(--text)', fontSize: 12, cursor: 'pointer' }}>Copy</button>
+                  </div>
+                  <p style={{ fontSize: 11, color: 'var(--text3)', marginTop: 8 }}>This link is permanent and can be reused. Share it via WhatsApp, email, or any channel.</p>
+                </div>
+              )}
+            </div>
+          )}
+
           {tab === 'members' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {members.map(m => (
