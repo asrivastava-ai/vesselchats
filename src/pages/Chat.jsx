@@ -440,8 +440,9 @@ export default function Chat() {
           )}
         </div>
 
-        {/* AI Ops Panel — right column, vessel active */}
+        {/* AI Ops Panel + Latest Emails — right columns, vessel active */}
         {showEmailTeaser && !isMobile && (
+          <>
           <div style={{ width: 300, flexShrink: 0, borderLeft: '1px solid var(--border)', background: 'var(--bg2)', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
             {/* Panel header */}
             <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -565,6 +566,7 @@ export default function Chat() {
               </div>
             </div>
           </div>
+          </>
         )}
       </div>
 
