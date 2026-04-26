@@ -13,6 +13,8 @@ export default function GroupAdmin({ groupId, groupName, onClose }) {
   const [vessels, setVessels] = useState([]);
   const [members, setMembers] = useState([]);
   const [newVessel, setNewVessel] = useState('');
+  const [editingVessel, setEditingVessel] = useState(null);
+  const [editVesselName, setEditVesselName] = useState('');
   const [inviteName, setInviteName] = useState('');
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('member');
@@ -40,6 +42,14 @@ export default function GroupAdmin({ groupId, groupName, onClose }) {
   async function removeVessel(id) {
     if (!window.confirm('Remove this vessel?')) return;
     await deleteDoc(doc(db, 'groups', groupId, 'vessels', id));
+  }
+
+  async function saveVesselEdit(id) {
+    if (!editVesselName.trim()) return;
+    const { updateDoc: upd } = await import('firebase/firestore');
+    await upd(doc(db, 'groups', groupId, 'vessels', id), { name: editVesselName.trim() });
+    setEditingVessel(null);
+    setEditVesselName('');
   }
 
   async function sendInvite() {
@@ -100,9 +110,22 @@ export default function GroupAdmin({ groupId, groupName, onClose }) {
                 <button onClick={addVessel} style={{ padding: '8px 14px', background: 'var(--accent)', border: 'none', borderRadius: 'var(--radius)', color: 'white', fontSize: 13 }}>Add</button>
               </div>
               {vessels.map(v => (
-                <div key={v.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', background: 'var(--bg3)', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
-                  <span style={{ fontSize: 13 }}>{v.name}</span>
-                  <button onClick={() => removeVessel(v.id)} style={{ background: 'none', border: 'none', color: 'var(--text3)', fontSize: 12, cursor: 'pointer' }}>Remove</button>
+                <div key={v.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'var(--bg3)', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
+                  {editingVessel === v.id ? (
+                    <>
+                      <input value={editVesselName} onChange={e => setEditVesselName(e.target.value)}
+                        onKeyDown={e => { if(e.key==='Enter') saveVesselEdit(v.id); if(e.key==='Escape') setEditingVessel(null); }}
+                        autoFocus style={{ flex: 1, padding: '4px 8px', background: 'var(--bg)', border: '1px solid var(--accent)', borderRadius: 4, color: 'var(--text)', fontSize: 13, outline: 'none' }} />
+                      <button onClick={() => saveVesselEdit(v.id)} style={{ background: 'var(--accent)', border: 'none', borderRadius: 4, color: 'white', fontSize: 11, padding: '3px 8px', cursor: 'pointer' }}>Save</button>
+                      <button onClick={() => setEditingVessel(null)} style={{ background: 'none', border: 'none', color: 'var(--text3)', fontSize: 11, cursor: 'pointer' }}>Cancel</button>
+                    </>
+                  ) : (
+                    <>
+                      <span style={{ fontSize: 13, flex: 1 }}>{v.name}</span>
+                      <button onClick={() => { setEditingVessel(v.id); setEditVesselName(v.name); }} style={{ background: 'none', border: 'none', color: 'var(--text2)', fontSize: 12, cursor: 'pointer', padding: '0 4px' }} title="Edit">✏️</button>
+                      <button onClick={() => removeVessel(v.id)} style={{ background: 'none', border: 'none', color: 'var(--text3)', fontSize: 12, cursor: 'pointer', padding: '0 4px' }} title="Delete">🗑️</button>
+                    </>
+                  )}
                 </div>
               ))}
               {vessels.length === 0 && <p style={{ color: 'var(--text3)', fontSize: 13 }}>No vessels yet. Add one above.</p>}
