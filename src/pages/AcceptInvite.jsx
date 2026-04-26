@@ -4,10 +4,12 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, arrayUnion, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
 import { initials } from '../lib/utils';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function AcceptInvite() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
+  const { user, profile, loading: authLoading } = useAuth();
   const token = params.get('token');
 
   const [invite, setInvite] = useState(null);
@@ -16,12 +18,14 @@ export default function AcceptInvite() {
   const [password, setPassword] = useState('');
   const [password2, setPassword2] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [inviteLoading, setInviteLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [isGroupLink, setIsGroupLink] = useState(false);
+  const [joined, setJoined] = useState(false);
 
+  // Load invite
   useEffect(() => {
-    if (!token) { setError('Invalid invite link.'); setLoading(false); return; }
+    if (!token) { setError('Invalid invite link.'); setInviteLoading(false); return; }
     getDoc(doc(db, 'invites', token)).then(snap => {
       if (!snap.exists()) { setError('This invite link is invalid.'); }
       else if (snap.data().used && !snap.data().permanent) { setError('This invite link has already been used.'); }
@@ -29,14 +33,39 @@ export default function AcceptInvite() {
         const data = snap.data();
         setInvite(data);
         setIsGroupLink(data.groupLink === true);
-        if (!data.groupLink) {
-          setName(data.name || '');
-          setEmail(data.email || '');
-        }
+        if (!data.groupLink) { setName(data.name || ''); setEmail(data.email || ''); }
       }
-      setLoading(false);
+      setInviteLoading(false);
     });
   }, [token]);
+
+  // Auto-join if already logged in
+  useEffect(() => {
+    if (authLoading || inviteLoading || !user || !invite || joined) return;
+    autoJoin();
+  }, [authLoading, inviteLoading, user, invite]);
+
+  async function autoJoin() {
+    setSubmitting(true);
+    try {
+      const memberSnap = await getDoc(doc(db, 'groups', invite.groupId, 'members', user.uid));
+      if (!memberSnap.exists()) {
+        await setDoc(doc(db, 'groups', invite.groupId, 'members', user.uid), {
+          role: invite.role || 'member',
+          joinedAt: serverTimestamp(),
+          name: profile?.name || '',
+          email: profile?.email || ''
+        });
+        await updateDoc(doc(db, 'users', user.uid), { groups: arrayUnion(invite.groupId) });
+        if (!invite.permanent) await updateDoc(doc(db, 'invites', token), { used: true });
+      }
+      setJoined(true);
+      setTimeout(() => navigate('/'), 1500);
+    } catch (err) {
+      setError('Failed to join: ' + err.message);
+      setSubmitting(false);
+    }
+  }
 
   async function handleAccept(e) {
     e.preventDefault();
@@ -55,28 +84,63 @@ export default function AcceptInvite() {
         name: name.trim(), email: email.trim().toLowerCase()
       });
       await updateDoc(doc(db, 'users', uid), { groups: arrayUnion(invite.groupId) });
-      // Only mark used if not a permanent group link
-      if (!invite.permanent) {
-        await updateDoc(doc(db, 'invites', token), { used: true });
-      }
+      if (!invite.permanent) await updateDoc(doc(db, 'invites', token), { used: true });
       navigate('/');
     } catch (err) {
-      if (err.code === 'auth/email-already-in-use') setError('This email already has an account. Please sign in instead.');
-      else setError('Something went wrong: ' + err.message);
+      if (err.code === 'auth/email-already-in-use') {
+        setError('This email already has an account. Sign in first, then open the invite link again.');
+      } else {
+        setError('Something went wrong: ' + err.message);
+      }
     }
     setSubmitting(false);
   }
 
   const inp = { width: '100%', padding: '10px 12px', background: 'var(--bg2)', border: '1px solid var(--border2)', borderRadius: 'var(--radius)', color: 'var(--text)', fontSize: 14, outline: 'none' };
 
-  if (loading) return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text2)' }}>Checking invite...</div>;
+  if (inviteLoading || authLoading) return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text2)' }}>Checking invite...</div>
+  );
+
   if (error && !invite) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12 }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12, background: 'var(--bg)' }}>
       <p style={{ color: '#f85149' }}>{error}</p>
       <Link to="/login" style={{ color: 'var(--accent-light)', fontSize: 13 }}>Go to login</Link>
     </div>
   );
 
+  // Already logged in — show auto-join screen
+  if (user) return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)' }}>
+      <div style={{ width: 360, textAlign: 'center' }}>
+        <div style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--accent-light)', letterSpacing: '0.15em', marginBottom: 24 }}>VESSELCHATS</div>
+        {joined ? (
+          <>
+            <div style={{ fontSize: 40, marginBottom: 12 }}>✅</div>
+            <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>Joined {invite?.groupName}!</h2>
+            <p style={{ color: 'var(--text2)', fontSize: 13 }}>Taking you to the chat...</p>
+          </>
+        ) : submitting ? (
+          <>
+            <div style={{ fontSize: 40, marginBottom: 12 }}>⏳</div>
+            <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>Joining {invite?.groupName}...</h2>
+            <p style={{ color: 'var(--text2)', fontSize: 13 }}>Just a moment.</p>
+          </>
+        ) : (
+          <>
+            <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>Join {invite?.groupName}?</h2>
+            <p style={{ color: 'var(--text2)', fontSize: 13, marginBottom: 20 }}>You're signed in as <strong style={{ color: 'var(--text)' }}>{profile?.name}</strong></p>
+            <button onClick={autoJoin} style={{ width: '100%', padding: 11, background: 'var(--accent)', border: 'none', borderRadius: 'var(--radius)', color: 'white', fontSize: 14, fontWeight: 500, cursor: 'pointer' }}>
+              Join group
+            </button>
+            {error && <p style={{ color: '#f85149', fontSize: 13, marginTop: 10 }}>{error}</p>}
+          </>
+        )}
+      </div>
+    </div>
+  );
+
+  // Not logged in — signup form
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)' }}>
       <div style={{ width: 380 }}>
@@ -93,17 +157,16 @@ export default function AcceptInvite() {
             Invited as <strong>{invite?.email}</strong> · Role: <strong>{invite?.role || 'member'}</strong>
           </div>
         )}
-
         {isGroupLink && (
           <div style={{ padding: '10px 14px', background: 'rgba(158,106,3,0.1)', border: '1px solid rgba(158,106,3,0.25)', borderRadius: 'var(--radius)', marginBottom: 20, fontSize: 13, color: '#d4a72c' }}>
-            Group invite link · You'll join as a <strong>member</strong>
+            Group invite · You'll join as a <strong>member</strong>
           </div>
         )}
 
         <form onSubmit={handleAccept} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div>
             <label style={{ display: 'block', fontSize: 12, color: 'var(--text2)', marginBottom: 5 }}>Your full name</label>
-            <input value={name} onChange={e => setName(e.target.value)} required placeholder="e.g. Sarah Mitchell" style={inp} />
+            <input value={name} onChange={e => setName(e.target.value)} required placeholder="e.g. Siddharth Sharma" style={inp} />
           </div>
           {isGroupLink && (
             <div>
@@ -121,11 +184,11 @@ export default function AcceptInvite() {
           </div>
           {error && <p style={{ color: '#f85149', fontSize: 13 }}>{error}</p>}
           <button type="submit" disabled={submitting} style={{ marginTop: 4, padding: 11, background: 'var(--accent)', border: 'none', borderRadius: 'var(--radius)', color: 'white', fontSize: 14, fontWeight: 500 }}>
-            {submitting ? 'Joining...' : 'Join group'}
+            {submitting ? 'Joining...' : 'Create account & join'}
           </button>
         </form>
         <p style={{ marginTop: 16, fontSize: 12, color: 'var(--text3)', textAlign: 'center' }}>
-          Already have an account? <Link to="/login" style={{ color: 'var(--accent-light)' }}>Sign in</Link>
+          Already have an account? <Link to={`/login?redirect=/invite?token=${token}`} style={{ color: 'var(--accent-light)' }}>Sign in first</Link>
         </p>
       </div>
     </div>
