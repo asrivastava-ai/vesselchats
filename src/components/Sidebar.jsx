@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { signOut } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
@@ -8,7 +8,8 @@ export default function Sidebar({ groups, activeSelection, onSelect, getUnreadCo
   const { profile } = useAuth();
   const [search, setSearch] = useState('');
   const [width, setWidth] = useState(240);
-  const [collapsed, setCollapsed] = useState({});
+  const [collapsed, setCollapsed] = useState(() => { const init = {}; return init; });
+  const [initialised, setInitialised] = useState(false);
   const dragging = useRef(false);
   const startX = useRef(0);
   const startW = useRef(0);
@@ -28,6 +29,17 @@ export default function Sidebar({ groups, activeSelection, onSelect, getUnreadCo
     document.removeEventListener('mouseup', onMouseUp);
   }
 
+  // Collapse all groups on first load
+  useEffect(() => {
+    if (!initialised && groups.length > 0) {
+      const init = {};
+      groups.forEach(g => { init[g.id] = true; });
+      setCollapsed(init);
+      setInitialised(true);
+    }
+  }, [groups]);
+
+  // Need useEffect import
   function toggleCollapse(groupId) {
     setCollapsed(s => ({ ...s, [groupId]: !s[groupId] }));
   }
