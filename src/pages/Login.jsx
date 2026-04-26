@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../lib/firebase';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 
 export default function Login() {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const redirect = searchParams.get('redirect') || '/';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -14,6 +17,7 @@ export default function Login() {
     setError(''); setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      navigate(redirect);
     } catch {
       setError('Invalid email or password.');
     }
