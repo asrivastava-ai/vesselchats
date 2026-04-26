@@ -41,11 +41,16 @@ export default function Chat() {
     return () => window.removeEventListener('resize', handle);
   }, []);
 
-  // Load all users
+  // Load all users — exclude superadmin
   useEffect(() => {
     return onSnapshot(collection(db, 'users'), snap => {
       const map = {};
-      snap.docs.forEach(d => { map[d.id] = { id: d.id, ...d.data() }; });
+      snap.docs.forEach(d => {
+        const data = d.data();
+        if (data.email !== 'aloksrius@yahoo.com') {
+          map[d.id] = { id: d.id, ...data };
+        }
+      });
       setAllUsers(map);
     });
   }, []);
