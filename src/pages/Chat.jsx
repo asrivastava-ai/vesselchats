@@ -20,6 +20,8 @@ export default function Chat() {
   const [input, setInput] = useState('');
   const [routingHint, setRoutingHint] = useState([]);
   const [showAdmin, setShowAdmin] = useState(false);
+  const [adminGroupId, setAdminGroupId] = useState(null);
+  const [adminGroupName, setAdminGroupName] = useState('');
   const [showCreateGroup, setShowCreateGroup] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -310,7 +312,7 @@ export default function Chat() {
 
       {/* Body */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        <Sidebar groups={groups} activeSelection={activeSelection} onSelect={setActiveSelection} getUnreadCount={getUnreadCount} isMobile={isMobile} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} onCreateGroup={() => setShowCreateGroup(true)} allUsers={allUsers} />
+        <Sidebar groups={groups} activeSelection={activeSelection} onSelect={setActiveSelection} getUnreadCount={getUnreadCount} isMobile={isMobile} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} onCreateGroup={() => setShowCreateGroup(true)} allUsers={allUsers} memberRoles={memberRoles} onAdminGroup={(gid, gname) => { setAdminGroupId(gid); setAdminGroupName(gname); setShowAdmin(true); }} />
 
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           {/* Email teaser banner */}
@@ -439,8 +441,8 @@ export default function Chat() {
         </div>
       )}
 
-      {showAdmin && activeSelection?.groupId && (
-        <GroupAdmin groupId={activeSelection.groupId} groupName={groups.find(g => g.id === activeSelection.groupId)?.name || ''} onClose={() => setShowAdmin(false)} />
+      {showAdmin && adminGroupId && (
+        <GroupAdmin groupId={adminGroupId} groupName={adminGroupName} onClose={() => { setShowAdmin(false); setAdminGroupId(null); }} />
       )}
     </div>
   );
