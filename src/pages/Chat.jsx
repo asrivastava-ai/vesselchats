@@ -435,20 +435,94 @@ export default function Chat() {
           )}
         </div>
 
-        {/* Email / AI Summary right panel — shown when a vessel is active */}
+        {/* AI Ops Panel — right column, vessel active */}
         {showEmailTeaser && !isMobile && (
-          <div style={{ width: 220, flexShrink: 0, borderLeft: '1px solid var(--border)', background: 'var(--bg2)', display: 'flex', flexDirection: 'column', padding: 16, gap: 12 }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>AI Email Summary</div>
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, textAlign: 'center' }}>
-              <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(158,106,3,0.15)', border: '1px solid rgba(158,106,3,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>📧</div>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 500, color: '#d4a72c', marginBottom: 6 }}>Connect your email</div>
-                <div style={{ fontSize: 12, color: 'var(--text2)', lineHeight: 1.6 }}>Get AI-powered summaries of the last 2 days of emails for this vessel — right here.</div>
+          <div style={{ width: 300, flexShrink: 0, borderLeft: '1px solid var(--border)', background: 'var(--bg2)', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+            {/* Panel header */}
+            <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Vessel AI Panel</div>
+              <span style={{ fontSize: 10, padding: '2px 7px', background: 'rgba(158,106,3,0.15)', border: '1px solid rgba(158,106,3,0.3)', borderRadius: 10, color: '#d4a72c', fontWeight: 600 }}>COMING SOON</span>
+            </div>
+
+            <div style={{ padding: 14, display: 'flex', flexDirection: 'column', gap: 12 }}>
+
+              {/* Email summary section */}
+              <div style={{ background: 'var(--bg3)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', overflow: 'hidden' }}>
+                <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 14 }}>📧</span>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>Email Summary</span>
+                  <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--text3)' }}>Last 48 hrs</span>
+                </div>
+                <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {[
+                    { icon: '🔔', label: 'NOR tendered', detail: 'Awaiting laytime start confirmation', time: '2h ago', color: '#d4a72c' },
+                    { icon: '⚓', label: 'ETA update', detail: 'Master confirms arrival 14:00 LT', time: '5h ago', color: '#58a6ff' },
+                    { icon: '⛽', label: 'Bunker enquiry', detail: 'Reply from ING bunkers pending', time: '8h ago', color: '#3fb950' },
+                  ].map((item, i) => (
+                    <div key={i} style={{ display: 'flex', gap: 8, padding: '7px 8px', background: 'var(--bg2)', borderRadius: 6, border: '1px solid var(--border)', opacity: 0.6 }}>
+                      <span style={{ fontSize: 14, flexShrink: 0 }}>{item.icon}</span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 11, fontWeight: 600, color: item.color }}>{item.label}</div>
+                        <div style={{ fontSize: 11, color: 'var(--text2)', marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.detail}</div>
+                      </div>
+                      <span style={{ fontSize: 10, color: 'var(--text3)', flexShrink: 0, alignSelf: 'flex-start', marginTop: 1 }}>{item.time}</span>
+                    </div>
+                  ))}
+                  <div style={{ fontSize: 11, color: 'var(--text3)', textAlign: 'center', padding: '4px 0' }}>Connect Gmail or Outlook to see real data</div>
+                </div>
               </div>
-              <div style={{ width: '100%', padding: '8px 12px', background: 'rgba(158,106,3,0.1)', border: '1px solid rgba(158,106,3,0.25)', borderRadius: 'var(--radius)', fontSize: 11, color: '#d4a72c', fontWeight: 500 }}>
-                🚀 Coming soon
+
+              {/* Voyage status */}
+              <div style={{ background: 'var(--bg3)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', overflow: 'hidden' }}>
+                <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 14 }}>🗺️</span>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>Voyage Status</span>
+                </div>
+                <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 6, opacity: 0.6 }}>
+                  {[
+                    { label: 'Status', value: 'At Load Port', color: '#3fb950' },
+                    { label: 'ETA', value: '26 Apr 14:00 LT', color: 'var(--text)' },
+                    { label: 'Cargo', value: 'Iron Ore — 62,500 MT', color: 'var(--text)' },
+                    { label: 'Charterer', value: '—', color: 'var(--text3)' },
+                    { label: 'Laytime', value: 'Not started', color: '#d4a72c' },
+                  ].map((r, i) => (
+                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 0', borderBottom: i < 4 ? '1px solid var(--border)' : 'none' }}>
+                      <span style={{ fontSize: 11, color: 'var(--text3)' }}>{r.label}</span>
+                      <span style={{ fontSize: 11, fontWeight: 500, color: r.color }}>{r.value}</span>
+                    </div>
+                  ))}
+                  <div style={{ fontSize: 11, color: 'var(--text3)', textAlign: 'center', paddingTop: 4 }}>Connect voyage system to see live data</div>
+                </div>
               </div>
-              <div style={{ fontSize: 11, color: 'var(--text3)', lineHeight: 1.6 }}>Gmail & Outlook integration planned. Action items, ETAs, and NORs auto-extracted.</div>
+
+              {/* Action items */}
+              <div style={{ background: 'var(--bg3)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', overflow: 'hidden' }}>
+                <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 14 }}>✅</span>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>AI Action Items</span>
+                </div>
+                <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 6, opacity: 0.6 }}>
+                  {[
+                    { done: false, text: 'Confirm stowage plan with master' },
+                    { done: false, text: 'Chase bunker stem confirmation' },
+                    { done: true,  text: 'NOR sent to charterers' },
+                    { done: false, text: 'Submit port disbursement estimate' },
+                  ].map((item, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 7 }}>
+                      <div style={{ width: 14, height: 14, borderRadius: 3, border: `1px solid ${item.done ? '#3fb950' : 'var(--border2)'}`, background: item.done ? 'rgba(26,127,75,0.2)' : 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1, fontSize: 9, color: '#3fb950' }}>{item.done ? '✓' : ''}</div>
+                      <span style={{ fontSize: 11, color: item.done ? 'var(--text3)' : 'var(--text2)', textDecoration: item.done ? 'line-through' : 'none' }}>{item.text}</span>
+                    </div>
+                  ))}
+                  <div style={{ fontSize: 11, color: 'var(--text3)', textAlign: 'center', paddingTop: 4 }}>AI extracts action items from emails automatically</div>
+                </div>
+              </div>
+
+              {/* Connect CTA */}
+              <div style={{ padding: '12px', background: 'rgba(158,106,3,0.08)', border: '1px solid rgba(158,106,3,0.2)', borderRadius: 'var(--radius)', textAlign: 'center' }}>
+                <div style={{ fontSize: 12, color: '#d4a72c', fontWeight: 500, marginBottom: 6 }}>🚀 Plugin your email to activate</div>
+                <div style={{ fontSize: 11, color: 'var(--text3)', lineHeight: 1.6 }}>Gmail & Outlook integration coming soon. All data shown above will be live and vessel-specific.</div>
+              </div>
+
             </div>
           </div>
         )}
