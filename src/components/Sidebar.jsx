@@ -117,7 +117,7 @@ export default function Sidebar({ groups, activeSelection, onSelect, getUnreadCo
                   display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 0,
                   background: 'none', border: 'none', cursor: 'pointer', padding: '3px 6px',
                 }}>
-                  <span style={{ fontSize: 10, color: 'var(--text3)', transition: 'transform 0.15s', transform: isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)', flexShrink: 0 }}>▾</span>
+                  <span style={{ fontSize: 12, color: 'var(--text3)', transition: 'transform 0.2s', transform: isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)', flexShrink: 0, display: 'inline-block' }}>▾</span>
                   <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.06em', flex: 1, textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{group.name}</span>
                   {groupUnread > 0 && <span style={{ background: 'var(--accent)', color: 'white', fontSize: 10, borderRadius: 10, padding: '1px 5px', flexShrink: 0 }}>{groupUnread}</span>}
                 </button>
