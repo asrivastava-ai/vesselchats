@@ -205,12 +205,32 @@ export default function Chat() {
       });
     } else if (activeSelection?.groupId) {
       const matched = detectVessels(text);
-      await addDoc(collection(db, 'groups', activeSelection.groupId, 'messages'), {
-        text, senderId: user.uid, senderName: profile?.name || 'Unknown',
-        senderInitials: initials(profile?.name || '?'),
-        timestamp: serverTimestamp(), vesselIds: matched.map(v => v.id),
-        readBy: { [user.uid]: true }
-      });
+
+      if (matched.length === 0) {
+        // No vessel match — send to active group as common message
+        await addDoc(collection(db, 'groups', activeSelection.groupId, 'messages'), {
+          text, senderId: user.uid, senderName: profile?.name || 'Unknown',
+          senderInitials: initials(profile?.name || '?'),
+          timestamp: serverTimestamp(), vesselIds: [],
+          readBy: { [user.uid]: true }
+        });
+      } else {
+        // Group matched vessels by their group
+        const byGroup = {};
+        matched.forEach(v => {
+          if (!byGroup[v.groupId]) byGroup[v.groupId] = [];
+          byGroup[v.groupId].push(v.id);
+        });
+        // Send one message per group that has matched vessels
+        for (const [gid, vids] of Object.entries(byGroup)) {
+          await addDoc(collection(db, 'groups', gid, 'messages'), {
+            text, senderId: user.uid, senderName: profile?.name || 'Unknown',
+            senderInitials: initials(profile?.name || '?'),
+            timestamp: serverTimestamp(), vesselIds: vids,
+            readBy: { [user.uid]: true }
+          });
+        }
+      }
     }
     setInput(''); setRoutingHint([]);
     inputRef.current?.focus();
