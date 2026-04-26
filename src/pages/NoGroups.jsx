@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { collection, doc, setDoc, serverTimestamp, addDoc } from 'firebase/firestore';
+import { collection, doc, setDoc, serverTimestamp, addDoc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
 import { db, auth } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
@@ -25,8 +25,6 @@ export default function NoGroups() {
         role: 'admin', joinedAt: serverTimestamp(),
         name: profile?.name || '', email: profile?.email || ''
       });
-      // Update user's groups list
-      const { updateDoc, arrayUnion } = await import('firebase/firestore');
       await updateDoc(doc(db, 'users', user.uid), { groups: arrayUnion(groupRef.id) });
     } catch (err) {
       setError('Failed to create group. Try again.');
@@ -50,38 +48,36 @@ export default function NoGroups() {
         </div>
 
         <h2 style={{ fontSize: 20, fontWeight: 600, marginBottom: 6 }}>Welcome, {profile?.name?.split(' ')[0]}!</h2>
-        <p style={{ color: 'var(--text2)', fontSize: 14, marginBottom: 32 }}>
-          You're not part of any group yet. Create one for your fleet, or wait for an invite link from your team.
+        <p style={{ color: 'var(--text2)', fontSize: 14, marginBottom: 28 }}>
+          You're not part of any group yet.
         </p>
 
+        {/* Invite link box — primary action */}
+        <div style={{ padding: '16px', background: 'var(--accent-bg)', border: '1px solid rgba(29,111,164,0.3)', borderRadius: 'var(--radius)', marginBottom: 16 }}>
+          <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text)', marginBottom: 6 }}>Have an invite link?</div>
+          <div style={{ fontSize: 13, color: 'var(--text2)' }}>Open the invite link sent to you — it will add you to the group automatically. You can open it in this browser while signed in.</div>
+        </div>
+
+        {/* Create group — secondary */}
         {!showCreate ? (
-          <button onClick={() => setShowCreate(true)} style={{ width: '100%', padding: '12px', background: 'var(--accent)', border: 'none', borderRadius: 'var(--radius)', color: 'white', fontSize: 14, fontWeight: 500 }}>
-            + Create a new group
+          <button onClick={() => setShowCreate(true)} style={{ width: '100%', padding: '10px', background: 'none', border: '1px solid var(--border2)', borderRadius: 'var(--radius)', color: 'var(--text2)', fontSize: 13, cursor: 'pointer' }}>
+            + Create a new group instead
           </button>
         ) : (
-          <form onSubmit={createGroup} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div>
-              <label style={{ display: 'block', fontSize: 12, color: 'var(--text2)', marginBottom: 5 }}>Group name</label>
-              <input value={groupName} onChange={e => setGroupName(e.target.value)} required
-                placeholder="e.g. GeoServes Fleet Ops"
-                style={{ width: '100%', padding: '10px 12px', background: 'var(--bg2)', border: '1px solid var(--border2)', borderRadius: 'var(--radius)', color: 'var(--text)', fontSize: 14, outline: 'none' }}
-              />
-              <p style={{ fontSize: 12, color: 'var(--text3)', marginTop: 5 }}>You'll be the admin. You can invite your team after creation.</p>
-            </div>
+          <form onSubmit={createGroup} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <input value={groupName} onChange={e => setGroupName(e.target.value)} required
+              placeholder="e.g. GeoServes Fleet Ops"
+              style={{ width: '100%', padding: '10px 12px', background: 'var(--bg2)', border: '1px solid var(--border2)', borderRadius: 'var(--radius)', color: 'var(--text)', fontSize: 14, outline: 'none' }}
+            />
             {error && <p style={{ color: '#f85149', fontSize: 13 }}>{error}</p>}
             <div style={{ display: 'flex', gap: 8 }}>
-              <button type="button" onClick={() => setShowCreate(false)} style={{ flex: 1, padding: 10, background: 'none', border: '1px solid var(--border2)', borderRadius: 'var(--radius)', color: 'var(--text2)', fontSize: 14 }}>Cancel</button>
-              <button type="submit" disabled={creating} style={{ flex: 2, padding: 10, background: 'var(--accent)', border: 'none', borderRadius: 'var(--radius)', color: 'white', fontSize: 14, fontWeight: 500 }}>
+              <button type="button" onClick={() => setShowCreate(false)} style={{ flex: 1, padding: 10, background: 'none', border: '1px solid var(--border2)', borderRadius: 'var(--radius)', color: 'var(--text2)', fontSize: 13 }}>Cancel</button>
+              <button type="submit" disabled={creating} style={{ flex: 2, padding: 10, background: 'var(--accent)', border: 'none', borderRadius: 'var(--radius)', color: 'white', fontSize: 13, fontWeight: 500 }}>
                 {creating ? 'Creating...' : 'Create group'}
               </button>
             </div>
           </form>
         )}
-
-        <div style={{ marginTop: 20, padding: '14px', background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', fontSize: 13, color: 'var(--text2)' }}>
-          <strong style={{ color: 'var(--text)' }}>Have an invite link?</strong><br />
-          Open the invite link you received by email or message — it will add you to the group automatically.
-        </div>
       </div>
     </div>
   );
