@@ -5,6 +5,7 @@ import Signup from './pages/Signup';
 import Chat from './pages/Chat';
 import AcceptInvite from './pages/AcceptInvite';
 import NoGroups from './pages/NoGroups';
+import SuperAdmin from './pages/SuperAdmin';
 import './index.css';
 
 function RequireAuth({ children }) {
@@ -29,6 +30,7 @@ export default function App() {
           <Route path="/login" element={<RedirectIfAuth><Login /></RedirectIfAuth>} />
           <Route path="/signup" element={<RedirectIfAuth><Signup /></RedirectIfAuth>} />
           <Route path="/invite" element={<AcceptInvite />} />
+          <Route path="/superadmin" element={<SuperAdmin />} />
           <Route path="/" element={<RequireAuth><Chat /></RequireAuth>} />
         </Routes>
       </BrowserRouter>
