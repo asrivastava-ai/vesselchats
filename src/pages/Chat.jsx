@@ -123,16 +123,14 @@ export default function Chat() {
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages, dmMessages, activeSelection]);
 
-  function getActiveVessels() {
-    if (!activeSelection?.groupId) return [];
-    const g = groups.find(g => g.id === activeSelection.groupId);
-    return g?.vessels || [];
+  function getAllVessels() {
+    return groups.flatMap(g => (g.vessels || []).map(v => ({ ...v, groupId: g.id, groupName: g.name })));
   }
 
   function detectVessels(text) {
-    const vessels = getActiveVessels();
+    const allVessels = getAllVessels();
     const tl = text.toLowerCase();
-    return vessels.filter(v => {
+    return allVessels.filter(v => {
       const vl = v.name.toLowerCase();
       if (tl.includes(vl)) return true;
       const words = vl.split(' ').filter(w => w.length > 2 && !['mv', 'mt', 'msc', 'the'].includes(w));
@@ -404,7 +402,11 @@ export default function Chat() {
           {routingHint.length > 0 && (
             <div style={{ padding: '5px 16px', background: 'rgba(158,106,3,0.1)', borderTop: '1px solid rgba(158,106,3,0.25)', fontSize: 11, color: '#d4a72c', display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
               <span style={{ color: 'var(--text3)' }}>Routes to:</span>
-              {routingHint.map(v => <span key={v.id} style={{ background: 'rgba(158,106,3,0.2)', border: '1px solid rgba(158,106,3,0.3)', padding: '1px 6px', borderRadius: 4, color: '#d4a72c', fontWeight: 500 }}>{v.name}</span>)}
+              {routingHint.map(v => (
+                <span key={v.id} style={{ background: 'rgba(158,106,3,0.2)', border: '1px solid rgba(158,106,3,0.3)', padding: '1px 6px', borderRadius: 4, color: '#d4a72c', fontWeight: 500 }}>
+                  {v.name}{v.groupId !== activeSelection?.groupId ? <span style={{ opacity: 0.6, fontWeight: 400 }}> · {v.groupName}</span> : ''}
+                </span>
+              ))}
             </div>
           )}
           {uploadError && <div style={{ padding: '5px 16px', background: 'var(--red-bg)', fontSize: 12, color: '#f85149' }}>{uploadError}</div>}
