@@ -118,8 +118,8 @@ export default function Sidebar({ groups, activeSelection, onSelect, getUnreadCo
                   background: 'none', border: 'none', cursor: 'pointer', padding: '3px 6px',
                 }}>
                   <span style={{ fontSize: 12, color: 'var(--text3)', transition: 'transform 0.2s', transform: isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)', flexShrink: 0, display: 'inline-block' }}>▾</span>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.06em', flex: 1, textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{group.name}</span>
-                  {groupUnread > 0 && <span style={{ background: 'var(--accent)', color: 'white', fontSize: 10, borderRadius: 10, padding: '1px 5px', flexShrink: 0 }}>{groupUnread}</span>}
+                  <span style={{ fontSize: 11, fontWeight: 600, color: groupUnread > 0 ? 'var(--text)' : 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.06em', flex: 1, textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{group.name}</span>
+                  {groupUnread > 0 && <span style={{ background: '#d4a72c', color: '#0d1117', fontSize: 10, fontWeight: 700, borderRadius: 10, padding: '1px 6px', flexShrink: 0 }}>{groupUnread}</span>}
                 </button>
                 {memberRoles?.[group.id] === 'admin' && (
                   <button onClick={() => onAdminGroup && onAdminGroup(group.id, group.name)} title="Manage group" style={{
@@ -152,7 +152,7 @@ export default function Sidebar({ groups, activeSelection, onSelect, getUnreadCo
                       }}>
                         <div style={{ width: 18, height: 18, borderRadius: '50%', background: vc.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8, fontWeight: 600, color: vc.color, flexShrink: 0 }}>{initials(v.name)}</div>
                         <span style={{ fontSize: 12, color: active ? '#58a6ff' : vUnread > 0 ? 'var(--text)' : 'var(--text2)', fontWeight: vUnread > 0 ? 600 : active ? 500 : 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{v.name}</span>
-                        {vUnread > 0 && <span style={{ background: 'var(--accent)', color: 'white', fontSize: 10, borderRadius: 10, padding: '1px 5px', flexShrink: 0 }}>{vUnread}</span>}
+                        {vUnread > 0 && <span style={{ background: 'var(--accent)', color: 'white', fontSize: 10, fontWeight: 700, borderRadius: 10, padding: '1px 5px', flexShrink: 0, minWidth: 18, textAlign: 'center' }}>{vUnread}</span>}
                       </button>
                     );
                   })}
