@@ -4,7 +4,7 @@ import { auth } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { initials, avatarColor } from '../lib/utils';
 
-export default function Sidebar({ groups, activeSelection, onSelect, getUnreadCount, isMobile, isOpen, onClose, onCreateGroup, allUsers }) {
+export default function Sidebar({ groups, activeSelection, onSelect, getUnreadCount, isMobile, isOpen, onClose, onCreateGroup, allUsers, onAdminGroup, memberRoles }) {
   const { profile } = useAuth();
   const [search, setSearch] = useState('');
   const [width, setWidth] = useState(240);
@@ -112,14 +112,25 @@ export default function Sidebar({ groups, activeSelection, onSelect, getUnreadCo
           return (
             <div key={group.id} style={{ marginBottom: 4 }}>
               {/* Group header */}
-              <button onClick={() => toggleCollapse(group.id)} style={{
-                display: 'flex', alignItems: 'center', gap: 6, padding: '5px 10px', width: '100%',
-                background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text)',
-              }}>
-                <span style={{ fontSize: 10, color: 'var(--text3)', transition: 'transform 0.15s', transform: isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)' }}>▾</span>
-                <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.06em', flex: 1, textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{group.name}</span>
-                {groupUnread > 0 && <span style={{ background: 'var(--accent)', color: 'white', fontSize: 10, borderRadius: 10, padding: '1px 5px' }}>{groupUnread}</span>}
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', padding: '2px 10px 2px 4px' }}>
+                <button onClick={() => toggleCollapse(group.id)} style={{
+                  display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 0,
+                  background: 'none', border: 'none', cursor: 'pointer', padding: '3px 6px',
+                }}>
+                  <span style={{ fontSize: 10, color: 'var(--text3)', transition: 'transform 0.15s', transform: isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)', flexShrink: 0 }}>▾</span>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.06em', flex: 1, textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{group.name}</span>
+                  {groupUnread > 0 && <span style={{ background: 'var(--accent)', color: 'white', fontSize: 10, borderRadius: 10, padding: '1px 5px', flexShrink: 0 }}>{groupUnread}</span>}
+                </button>
+                {memberRoles?.[group.id] === 'admin' && (
+                  <button onClick={() => onAdminGroup && onAdminGroup(group.id, group.name)} title="Manage group" style={{
+                    background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text3)',
+                    fontSize: 13, padding: '2px 4px', borderRadius: 4, flexShrink: 0,
+                    lineHeight: 1
+                  }} onMouseEnter={e => e.currentTarget.style.color='var(--text)'} onMouseLeave={e => e.currentTarget.style.color='var(--text3)'}>
+                    ⚙️
+                  </button>
+                )}
+              </div>
 
               {!isCollapsed && (
                 <div>
